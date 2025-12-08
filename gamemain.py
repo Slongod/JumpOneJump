@@ -2,6 +2,7 @@ import pygame
 import time
 import character
 import render
+import mapper
 
 if __name__ == "__main__":
     # 初始化 pygame
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     pactor = character.player(posx = 0 , posy = 0)
     ppainter = character.player_painter(bind_player = pactor , color = character.BLUE)
     pctrller = character.player_controller(bind_player = pactor)
-    env , text , epainter , tpainter = read_map("map.move2dmap")
+    env , text , epainter , tpainter = mapper.read_map("map.move2dmap")
     
     # 执行游戏
     lstime = time.time()

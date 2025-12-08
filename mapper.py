@@ -24,15 +24,16 @@ def read_map(name:str):
 
     return (env , text , epainter , tpainter)
 
-def save(name:str , env , color):
+def save(name:str , env , epainter):
     file = open(name , "w")
-    scolor = str(color)
-    scolor = scolor.replace(' ' , '')
-    for b in env:
+    for i in range(0 , len(env)):
+        b = env[i]; col = epainter[i].getcol()
+        scolor = str(col)
+        scolor = scolor.replace(' ' , '')
         if type(b) == character.box:
-            file.write(str('BOX' + str(b.posx) + ' ' + str(b.posy) + ' ' + str(b.lenx) + ' ' + str(b.leny) + ' ' + scolor) + '\n')
+            file.write(str('BOX ' + str(b.posx) + ' ' + str(b.posy) + ' ' + str(b.lenx) + ' ' + str(b.leny) + ' ' + scolor) + '\n')
         elif type(b) == character.text:
-            file.write(str('TEXT' + str(b.posx) + ' ' + str(b.posy) + ' ' + str(b.lenx) + ' ' + str(b.leny) + ' ' + scolor) + '\n')
+            file.write(str('TEXT ' + str(b.posx) + ' ' + str(b.posy) + ' ' + str(b.text) + ' ' + str(b.size) + ' ' + scolor) + '\n')
             
     file.write('end')
     file.close()
@@ -64,60 +65,76 @@ if __name__ == "__main__":
         nowid = 0
 
 
+    collst = [character.WHITE , character.RED , character.GOLD]
     # 执行
     lstime = time.time()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 c = pygame.key.name(event.key)
-                if c in ['w','a','s','d'] and nowobj != None:
-                    if c == 'w':
-                        nowobj.posy += 1
-                    if c == 'a':
-                        nowobj.posx -= 1
-                    if c == 's':
-                        nowobj.posy -= 1
-                    if c == 'd':
-                        nowobj.posx += 1
-                elif c in ['up','left','down','right'] and nowobj != None:
-                    if type(nowobj) == character.box:
-                        if c == 'up':
-                            nowobj.leny += 1
-                        if c == 'left':
-                            nowobj.lenx -= 1
-                        if c == 'down':
-                            nowobj.leny -= 1
-                        if c == 'right':
-                            nowobj.lenx += 1
-                    elif type(nowobj) == character.text:
-                        if c in ['up' , 'right']:
-                            nowobj.size += 1
-                        else:
-                            nowobj.size -= 1
-                elif c in ['o','p']:
-                    if c == 'o':
-                        if (nowid - 1 >= 0 and len(env) > nowid - 1):
-                            nowid -= 1; nowobj = env[nowid]
-                    else:
-                        if (nowid + 1 < len(env)):
-                            nowid += 1; nowobj = env[nowid]
-                elif c == 'i':
-                    nowid = len(env) + 1
+                if c == 'i':
                     env.append(character.box())
-                    epainter.append(character.box_painter(bind_box = env[-1] , color = _col))
+                    nowid = len(env) - 1
+                    epainter.append(character.box_painter(bind_box = env[-1] , color = character.WHITE))
                     nowobj = env[-1]
-                elif c == 't':
-                    del nowobj
-                    if len(env) > nowid:
-                        nowobj = env[nowid]
-                    else:
-                        nowobj = None
-                        nowid = -1
+                elif c == 'u':
+                    env.append(character.text(input('输入文本内容，然后按下回车：')))
+                    nowid = len(env) - 1
+                    epainter.append(character.text_painter(bind_text = env[-1] , color = character.WHITE))
+                    nowobj = env[-1]
+                elif nowid != -1 and nowobj != None:
+                    if c in ['w','a','s','d'] and nowobj != None:
+                        if c == 'w':
+                            nowobj.posy += 1
+                        if c == 'a':
+                            nowobj.posx -= 1
+                        if c == 's':
+                            nowobj.posy -= 1
+                        if c == 'd':
+                            nowobj.posx += 1
+                    elif c in ['up','left','down','right'] and nowobj != None:
+                        if type(nowobj) == character.box:
+                            if c == 'up':
+                                nowobj.leny += 1
+                            if c == 'left':
+                                nowobj.lenx -= 1
+                            if c == 'down':
+                                nowobj.leny -= 1
+                            if c == 'right':
+                                nowobj.lenx += 1
+                        elif type(nowobj) == character.text:
+                            if c in ['up' , 'right']:
+                                nowobj.size += 1
+                            else:
+                                nowobj.size -= 1
+                    elif c in ['o','p']:
+                        if c == 'o':
+                            if (nowid - 1 >= 0 and len(env) > nowid - 1):
+                                nowid -= 1; nowobj = env[nowid]
+                        else:
+                            if (nowid + 1 < len(env)):
+                                nowid += 1; nowobj = env[nowid]
+                    elif c == 'y' and type(epainter[nowid]) in (character.box_painter , character.text_painter):
+                        id = 0
+                        while collst[id] != epainter[nowid].getcol():
+                            id += 1
+                        id = (id + 1) % 3
+                        epainter[nowid].setcol(collst[id])
+                    elif c == 't':
+                        env.remove(nowobj)
+                        epainter.remove(epainter[nowid])
+                        del nowobj
+                        if len(env) != 0:
+                            nowid = min(nowid , len(env) - 1)
+                            nowobj = env[nowid]
+                        else:
+                            nowobj = None
+                            nowid = -1
                 
             if (event.type == pygame.QUIT):
-                save('map.move2dmap' , env , _col)
+                save('map.move2dmap' , env , epainter)
                 exit()
-
+        print(len(env))
         # 更新对象状态
         lstime = time.time()
 

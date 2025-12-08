@@ -212,12 +212,6 @@ class text:
     def getpos(self):
         return (self.posx , self.posy)
 
-class text_painter:
-    def __init__(self , bind_text:text , color:tuple = WHITE):
-        self.__bind_text = bind_text
-        self.__color = color
-    def get_draw(self):
-        return (TEXT , self.__color , (self.__bind_text.text , self.__bind_text.size , self.__bind_text.getpos()))
 
 class box_painter:
     def __init__(self , bind_box:box , color:tuple = WHITE):
@@ -229,6 +223,10 @@ class box_painter:
         up = self.__bind_box.up()
         down = self.__bind_box.down()
         return (POLYGON , self.__color , ((left , down) , (right , down) , (right , up) , (left , up)))
+    def getcol(self):
+        return self.__color
+    def setcol(self , color:tuple):
+        self.__color = color
         
 
 class player_painter:
@@ -289,6 +287,17 @@ class player_painter:
         pts = tuple(rotate(x , y , (left + right) / 2 , down , self.__bind_player.get_running_to_num() * self.__run_rot) for x , y in pts)
 
         return (POLYGON , self.__color , pts)
+
+class text_painter:
+    def __init__(self , bind_text:text , color:tuple = WHITE):
+        self.__bind_text = bind_text
+        self.__color = color
+    def get_draw(self):
+        return (TEXT , self.__color , (self.__bind_text.text , self.__bind_text.size , self.__bind_text.getpos()))
+    def getcol(self):
+        return self.__color
+    def setcol(self , color:tuple):
+        self.__color = color
 
 class player_controller:
     def __init__(self , bind_player:player , 
