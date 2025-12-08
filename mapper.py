@@ -98,16 +98,16 @@ if __name__ == "__main__":
                             if c == 'up':
                                 nowobj.leny += 1
                             if c == 'left':
-                                nowobj.lenx -= 1
+                                nowobj.leny = max(nowobj.lenx - 1 , 0)
                             if c == 'down':
-                                nowobj.leny -= 1
+                                nowobj.leny = max(nowobj.leny - 1 , 0)
                             if c == 'right':
                                 nowobj.lenx += 1
                         elif type(nowobj) == character.text:
                             if c in ['up' , 'right']:
                                 nowobj.size += 1
                             else:
-                                nowobj.size -= 1
+                                nowobj.size = max(1 , nowobj.size - 1)
                     elif c in ['o','p']:
                         if c == 'o':
                             if (nowid - 1 >= 0 and len(env) > nowid - 1):
