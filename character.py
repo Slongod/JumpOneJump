@@ -12,9 +12,17 @@ DOWN = -1
 RIGHT = 2
 LEFT = -2
 NOTHING = 0
+POLYGON = 'POLYGON'
+TEXT = 'TEXT'
 X = 0
 Y = 1
 PI = math.acos(-1)
+WHITE = (233 , 235 , 254)
+BLUE = (0 , 47 , 167)
+GOLD = (255 , 215 , 0)
+RED = (255 , 0 , 127)
+GREEN = (0 , 128 , 128)
+
 
 # 获取 op 方向的反向
 def reverse(op: int):
@@ -92,6 +100,7 @@ class player(box):
         self.__running = NOTHING # (NOTHING 无操作，否则为 RIGHT 或 LEFT)
         self.__last_jump_starting_time = NOTHING
 
+    # 获取 x 方向的加速度
     def __get_xa(self):
         if (self.__running == LEFT):
             return -self.__info_run[0]
@@ -194,8 +203,24 @@ class player(box):
                     elif (op[0] == DOWN):
                         self.posy = b.down() - (self.leny / 2)
 
+class text:
+    def __init__(self , text:str = '' , size:int = 20 , posx:int = 0 , posy:int = 0):
+        self.text = text
+        self.size = size
+        self.posx = posx
+        self.posy = posy
+    def getpos(self):
+        return (self.posx , self.posy)
+
+class text_painter:
+    def __init__(self , bind_text:text , color:tuple = WHITE):
+        self.__bind_text = bind_text
+        self.__color = color
+    def get_draw(self):
+        return (TEXT , self.__color , (self.__bind_text.text , self.__bind_text.size , self.__bind_text.getpos()))
+
 class box_painter:
-    def __init__(self , bind_box:box , color:tuple = (255 , 255 , 255)):
+    def __init__(self , bind_box:box , color:tuple = WHITE):
         self.__bind_box = bind_box
         self.__color = color
     def get_draw(self):
@@ -203,7 +228,7 @@ class box_painter:
         right = self.__bind_box.right()
         up = self.__bind_box.up()
         down = self.__bind_box.down()
-        return (self.__color , ((left , down) , (right , down) , (right , up) , (left , up)))
+        return (POLYGON , self.__color , ((left , down) , (right , down) , (right , up) , (left , up)))
         
 
 class player_painter:
@@ -215,7 +240,7 @@ class player_painter:
                                ) , 
                  jump_scale:tuple = (0.95 , 1.05) , 
                  run_rot:float = 4 , 
-                 color:tuple = (255 , 255 , 255)):
+                 color:tuple = WHITE):
         self.__bind_player = bind_player
         self.__down_scale = down_scale
         self.__jump_scale = jump_scale
@@ -263,7 +288,7 @@ class player_painter:
         pts = ((left , down) , (right , down) , (right , up) , (left , up))
         pts = tuple(rotate(x , y , (left + right) / 2 , down , self.__bind_player.get_running_to_num() * self.__run_rot) for x , y in pts)
 
-        return (self.__color , pts)
+        return (POLYGON , self.__color , pts)
 
 class player_controller:
     def __init__(self , bind_player:player , 
