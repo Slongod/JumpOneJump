@@ -90,6 +90,7 @@ if __name__ == "__main__":
                             nowobj.posx -= 1
                         if c == 's':
                             nowobj.posy -= 1
+                            
                         if c == 'd':
                             nowobj.posx += 1
                     elif c in ['up','left','down','right'] and nowobj != None:
