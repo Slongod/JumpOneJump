@@ -6,7 +6,6 @@ import mapper
 
 def player_dead(pactor:character.player , text:list , tpainter:list):
     posx , posy = pactor.getpos()
-    pactor.stopmoving()
     text.append(character.text(text = 'You Died' , size = 70 , posx = posx - 10 , posy = posy + 10))
     tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
     text.append(character.text(text = '请按 R 键复活' , size = 40 , posx = posx - 10 , posy = posy + 6))
@@ -31,7 +30,7 @@ if __name__ == "__main__":
     width = render._screen_width / base_len # 横向显示长度
     height = render._screen_height / base_len # 纵向显示长度
     centerpos = (width * 0.5 , height * 0.3)
-    pactor = character.player(posx = 0 , posy = 0)
+    pactor = character.player(posx = 0 , posy = 0 , gold = (2 , 4 , 5))
     ppainter = character.player_painter(bind_player = pactor , color = character.BLUE)
     pctrller = character.player_controller(bind_player = pactor)
     env , text , epainter , tpainter = mapper.read_map("map.move2dmap")

@@ -86,7 +86,7 @@ class player(box):
     #定义函数
     # init
     def __init__(self , m:float = 1 , 
-               run:list = [200.0 , 200.0] , jump:list = [20 , 0.15] , gold:float = (2 , 5) ,
+               run:list = [200.0 , 200.0] , jump:list = [20 , 0.15] , gold:float = (2 , 4 , 5) ,
                g:float = 200 , posx:float = 0 , posy:float = 0 , 
                stopv:float = 0.1 , max_run_speed:float = 10 , max_down_speed:float = 30):
         self.__m = m # 质量
@@ -104,17 +104,35 @@ class player(box):
         self.__last_jump_starting_time = 0
         self.__is_dead = False # 是否被地刺杀死
         self.__last_gold_time = 0
-        self.__info_gold = gold # (金币加成倍率 , 金币加成持续时间)
+        self.__info_gold = gold # (加速倍率 , 跳跃倍率 , 金币加成持续时间)
+        self.__is_ducking = False
     
     def is_dead(self):
         return self.__is_dead
+    def kill(self):
+        self.__running = NOTHING
+        self.__is_dead = True
+        self.stand_up()
     def relive(self):
         self.__is_dead = False
+
+    def duck(self):
+        if self.__is_ducking:
+            return
+        self.posy -= self.leny * 0.3
+        self.leny *= 0.4
+        self.__is_ducking = True
+    def stand_up(self):
+        if not self.__is_ducking:
+            return
+        self.leny *= 2.5
+        self.posy += self.leny * 0.3
+        self.__is_ducking = False
 
     # 获取 x 方向的加速度
     def __get_xa(self):
         times = 1
-        if time.time() - self.__last_gold_time <= self.__info_gold[1]:
+        if time.time() - self.__last_gold_time <= self.__info_gold[2]:
             times = self.__info_gold[0]
         if (self.__running == LEFT):
             return times * -self.__info_run[0]
@@ -126,6 +144,11 @@ class player(box):
             elif (self.__v[X] > 0):
                 return -self.__info_run[1]
         return 0
+    def __get_ja(self):
+        times = 1
+        if time.time() - self.__last_gold_time <= self.__info_gold[2]:
+            times = self.__info_gold[1]
+        return times * self.__info_jump[0]
     
     # to painter
     def get_last_jump_starting_time(self):
@@ -157,8 +180,6 @@ class player(box):
     def stoprun(self , op:int):
         assert (op in [LEFT , RIGHT])
         self.__running -= op
-    def stopmoving(self):
-        self.__running = NOTHING
 
     def is_on_ground(self , boxes:list):
         for b in boxes:
@@ -192,8 +213,8 @@ class player(box):
         if (time.time() - self.__last_jump_starting_time >= self.__info_jump[1]):
             self.stopjump()
         if (self.__is_jumping):
-            self.__v[Y] = self.__info_jump[0]
-            self.posy += self.__info_jump[0] * dtime
+            self.__v[Y] = self.__get_ja()
+            self.posy += self.__get_ja() * dtime
         elif (self.is_on_ground(boxes) == False):
             g = self.__g
             self.posy += self.__v[Y] * dtime - 0.5 * g * dtime * dtime
@@ -222,7 +243,7 @@ class player(box):
                         elif (op[0] == DOWN):
                             self.posy = b.down() - (self.leny / 2)
                 elif b.gettype() == RED:
-                    self.__is_dead = True
+                    self.kill()
                     break
                 elif b.gettype() == GOLD:
                     self.__last_gold_time = time.time()
@@ -328,13 +349,15 @@ class player_controller:
     def __init__(self , bind_player:player , 
                  left_key:tuple = ('a' , 'left') , 
                  right_key:tuple = ('d' , 'right') , 
-                 jump_key:tuple = ('space',) , 
+                 jump_key:tuple = ('space' , 'w') , 
+                 duck_key:tuple = ('s',),
                  jump_buffer_time:float = 0.05 , 
                  coyote_time:float = 0.05):
         self.__bind_player = bind_player
         self.__left_key = left_key
         self.__right_key = right_key
         self.__jump_key = jump_key
+        self.__duck_key = duck_key
         self.__jump_buffer_time = jump_buffer_time # 跳跃缓存时间
         self.__coyote_time = coyote_time # 野狼时间
         self.__last_pressed_jump_time = NOTHING # 最后按缓存的跳跃的时间
@@ -349,6 +372,8 @@ class player_controller:
                 self.__bind_player.startrun(RIGHT)
             if (key in self.__jump_key):
                 self.__last_pressed_jump_time = nowtime
+            if (key in self.__duck_key):
+                self.__bind_player.duck()
         else:
             if (key in self.__left_key):
                 self.__bind_player.stoprun(LEFT)
@@ -356,6 +381,8 @@ class player_controller:
                 self.__bind_player.stoprun(RIGHT)
             if (key in self.__jump_key):
                 self.__last_pressed_jump_time = NOTHING
+            if (key in self.__duck_key):
+                self.__bind_player.stand_up()
     def update(self , boxes:list = []):
         nowtime = time.time()
         if (self.__bind_player.is_on_ground(boxes)):
