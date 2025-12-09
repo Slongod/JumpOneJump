@@ -35,7 +35,7 @@ def rotate(x:float , y:float , x0:float , y0:float , alpha:float):
 
 # 矩形物体
 class box:
-    def __init__(self , lenx:float = 1 , leny:float = 1 , posx:float = 0 , posy:float = 0):
+    def __init__(self , lenx:float = 1 , leny:float = 1 , posx:float = 0 , posy:float = 0 , tp:tuple = WHITE):
         # 长宽
         self.lenx = lenx
         self.leny = leny
@@ -43,7 +43,10 @@ class box:
         # 中心点坐标
         self.posx = posx
         self.posy = posy
-
+        
+        self.tp = tp
+    def gettype(self):
+        return self.tp
     def left(self):
         return self.posx - self.lenx / 2
     def right(self):
@@ -83,7 +86,7 @@ class player(box):
     #定义函数
     # init
     def __init__(self , m:float = 1 , 
-               run:tuple = (200.0 , 200.0) , jump:float = (20 , 0.15) , 
+               run:list = [200.0 , 200.0] , jump:list = [20 , 0.15] , gold:float = (2 , 5) ,
                g:float = 200 , posx:float = 0 , posy:float = 0 , 
                stopv:float = 0.1 , max_run_speed:float = 10 , max_down_speed:float = 30):
         self.__m = m # 质量
@@ -98,14 +101,23 @@ class player(box):
         self.__v = [0] * 2 # X，Y 轴上的速度
         self.__is_jumping = False # 是否正在跳跃恒定速度阶段
         self.__running = NOTHING # (NOTHING 无操作，否则为 RIGHT 或 LEFT)
-        self.__last_jump_starting_time = NOTHING
+        self.__last_jump_starting_time = 0
+        self.__is_dead = False # 是否被地刺杀死
+        self.__last_gold_time = 0
+        self.__info_gold = gold # (金币加成倍率 , 金币加成持续时间)
+    
+    def is_dead(self):
+        return self.__is_dead
 
     # 获取 x 方向的加速度
     def __get_xa(self):
+        times = 1
+        if time.time() - self.__last_gold_time <= self.__info_gold[1]:
+            times = self.__info_gold[0]
         if (self.__running == LEFT):
-            return -self.__info_run[0]
+            return times * -self.__info_run[0]
         elif (self.__running == RIGHT):
-            return self.__info_run[0]
+            return times * self.__info_run[0]
         else:
             if (self.__v[X] < 0):
                 return self.__info_run[1]
@@ -140,10 +152,11 @@ class player(box):
     def startrun(self , op:int):
         assert (op in [LEFT , RIGHT])
         self.__running += op
-    
     def stoprun(self , op:int):
         assert (op in [LEFT , RIGHT])
         self.__running -= op
+    def stopmoving(self):
+        self.__running = NOTHING
 
     def is_on_ground(self , boxes:list):
         for b in boxes:
@@ -153,6 +166,9 @@ class player(box):
         return False
 
     def update(self , dtime:float , boxes:list):
+        if self.__is_dead: # 已死亡拒绝更新
+            return
+
         # 更新横向运动
         xa = self.__get_xa(); orig_v = self.__v[X]
         self.posx += self.__v[X] * dtime + 0.5 * xa * dtime * dtime
@@ -190,18 +206,25 @@ class player(box):
         for b in boxes:
             op = check_over(self , b)
             if (op != NOTHING):
-                if (op[0] in [LEFT , RIGHT]):
-                    self.__v[X] = 0
-                    if (op[0] == LEFT):
-                        self.posx = b.left() - (self.lenx / 2)
-                    elif (op[0] == RIGHT):
-                        self.posx = b.right() + (self.lenx / 2)
-                else:
-                    self.__v[Y] = 0
-                    if (op[0] == UP):
-                        self.posy = b.up() + (self.leny / 2)
-                    elif (op[0] == DOWN):
-                        self.posy = b.down() - (self.leny / 2)
+                if b.gettype() == WHITE:
+                    if (op[0] in [LEFT , RIGHT]):
+                        self.__v[X] = 0
+                        if (op[0] == LEFT):
+                            self.posx = b.left() - (self.lenx / 2)
+                        elif (op[0] == RIGHT):
+                            self.posx = b.right() + (self.lenx / 2)
+                    else:
+                        self.__v[Y] = 0
+                        if (op[0] == UP):
+                            self.posy = b.up() + (self.leny / 2)
+                        elif (op[0] == DOWN):
+                            self.posy = b.down() - (self.leny / 2)
+                elif b.gettype() == RED:
+                    self.__is_dead = True
+                    break
+                elif b.gettype() == GOLD:
+                    self.__last_gold_time = time.time()
+                
 
 class text:
     def __init__(self , text:str = '' , size:int = 20 , posx:int = 0 , posy:int = 0):
