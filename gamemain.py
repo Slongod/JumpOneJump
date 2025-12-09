@@ -4,6 +4,20 @@ import character
 import render
 import mapper
 
+def player_dead(pactor:character.player , text:list , tpainter:list):
+    posx , posy = pactor.getpos()
+    pactor.stopmoving()
+    text.append(character.text(text = 'You Died' , size = 70 , posx = posx - 10 , posy = posy + 10))
+    tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
+    text.append(character.text(text = '请按 R 建复活' , size = 40 , posx = posx - 10 , posy = posy + 6))
+    tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
+
+def player_relive(pactor:character.player , text:list , tpainter:list):
+    pactor.posx , pactor.posy = (0 , 0)
+    pactor.relive()
+    text.remove(text[-1]); text.remove(text[-2])
+    tpainter.remove(tpainter[-1]); tpainter.remove(tpainter[-2])
+
 if __name__ == "__main__":
     # 初始化 pygame
     pygame.init()
@@ -23,19 +37,22 @@ if __name__ == "__main__":
     env , text , epainter , tpainter = mapper.read_map("map.move2dmap")
     
     # 执行游戏
+    is_player_alive = True
     lstime = time.time()
-    while (True):
+    while True:
         for event in pygame.event.get():
-            if (event.type == pygame.KEYDOWN):
+            if event.type == pygame.KEYDOWN:
                 c = pygame.key.name(event.key)
-                if (c == 'r'):
-                    pactor.posx , pactor.posy = 0 , 0
-                else:
+                if not is_player_alive and c == 'r':
+                    is_player_alive = True
+                    player_relive(pactor , text , tpainter)
+                elif is_player_alive:
                     pctrller.move(c , True)
-            if (event.type == pygame.KEYUP):
-                c = pygame.key.name(event.key)
-                pctrller.move(c , False)
-            if (event.type == pygame.QUIT):
+            if event.type == pygame.KEYUP:
+                if is_player_alive:
+                    c = pygame.key.name(event.key)
+                    pctrller.move(c , False)
+            if event.type == pygame.QUIT:
                 exit()
 
         # 更新对象状态
@@ -48,11 +65,14 @@ if __name__ == "__main__":
         screen.fill((0 , 0 , 0))
 
         my_painter = []
-        for tp in tpainter:
-            my_painter.append(tp.get_draw())
         for ep in epainter:
             my_painter.append(ep.get_draw())
+        for tp in tpainter:
+            my_painter.append(tp.get_draw())
         my_painter.append(ppainter.get_draw(env))
         render.draw(screen , my_painter , base_len , pactor.getpos() , centerpos)
 
         pygame.display.update()
+        if is_player_alive and pactor.is_dead():
+            is_player_alive = False
+            player_dead(pactor , text , tpainter)

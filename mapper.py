@@ -16,7 +16,7 @@ def read_map(name:str):
         assert len(s) == 6
 
         if s[0] == 'BOX': # BOX
-            env.append(character.box(posx = int(s[1]) , posy = int(s[2]) , lenx = int(s[3]) , leny = int(s[4])))
+            env.append(character.box(posx = int(s[1]) , posy = int(s[2]) , lenx = int(s[3]) , leny = int(s[4]), tp = make_tuple(s[5][1:-1])))
             epainter.append(character.box_painter(bind_box = env[-1] , color = make_tuple(s[5][1:-1])))
         else:
             text.append(character.text(posx = int(s[1]) , posy = int(s[2]) , text = s[3] , size = int(s[4])))
@@ -56,7 +56,6 @@ if __name__ == "__main__":
     env , e2 , epainter , p2 = read_map("map.move2dmap")
     env.extend(e2); epainter.extend(p2)
 
-    _col = (233,235,254)
     player_start = character.box(posx = 0 , posy = 0 , lenx = 1 , leny = 1)
     player_start_painter = character.box_painter(bind_box = player_start , color = (0, 47, 167))
     nowobj = None; nowid = None
@@ -65,7 +64,7 @@ if __name__ == "__main__":
         nowid = 0
 
 
-    collst = [character.WHITE , character.RED , character.GOLD]
+    collst = [character.WHITE , character.RED , character.GOLD , character.GREEN]
     # 执行
     lstime = time.time()
     while True:
@@ -119,7 +118,7 @@ if __name__ == "__main__":
                         id = 0
                         while collst[id] != epainter[nowid].getcol():
                             id += 1
-                        id = (id + 1) % 3
+                        id = (id + 1) % 4
                         epainter[nowid].setcol(collst[id])
                     elif c == 't':
                         env.remove(nowobj)
