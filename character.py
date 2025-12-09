@@ -108,6 +108,8 @@ class player(box):
     
     def is_dead(self):
         return self.__is_dead
+    def relive(self):
+        self.__is_dead = False
 
     # 获取 x 方向的加速度
     def __get_xa(self):

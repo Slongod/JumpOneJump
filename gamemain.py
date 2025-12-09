@@ -9,14 +9,14 @@ def player_dead(pactor:character.player , text:list , tpainter:list):
     pactor.stopmoving()
     text.append(character.text(text = 'You Died' , size = 70 , posx = posx - 10 , posy = posy + 10))
     tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
-    text.append(character.text(text = '请按 R 建复活' , size = 40 , posx = posx - 10 , posy = posy + 6))
+    text.append(character.text(text = '请按 R 键复活' , size = 40 , posx = posx - 10 , posy = posy + 6))
     tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
 
 def player_relive(pactor:character.player , text:list , tpainter:list):
     pactor.posx , pactor.posy = (0 , 0)
     pactor.relive()
-    text.remove(text[-1]); text.remove(text[-2])
-    tpainter.remove(tpainter[-1]); tpainter.remove(tpainter[-2])
+    text.remove(text[-1]); text.remove(text[-1])
+    tpainter.remove(tpainter[-1]); tpainter.remove(tpainter[-1])
 
 if __name__ == "__main__":
     # 初始化 pygame
