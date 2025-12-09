@@ -6,7 +6,6 @@ import mapper
 
 def player_dead(pactor:character.player , text:list , tpainter:list):
     posx , posy = pactor.getpos()
-    pactor.stopmoving()
     text.append(character.text(text = 'You Died' , size = 70 , posx = posx - 10 , posy = posy + 10))
     tpainter.append(character.text_painter(bind_text = text[-1] , color = character.RED))
     text.append(character.text(text = '请按 R 键复活' , size = 40 , posx = posx - 10 , posy = posy + 6))
