@@ -17,7 +17,7 @@ if __name__ == "__main__":
     width = render._screen_width / base_len # 横向显示长度
     height = render._screen_height / base_len # 纵向显示长度
     centerpos = (width * 0.5 , height * 0.3)
-    pactor = character.player(posx = 0 , posy = -15)
+    pactor = character.player(posx = 0 , posy = 0)
     ppainter = character.player_painter(bind_player = pactor , color = character.BLUE)
     pctrller = character.player_controller(bind_player = pactor)
     env , text , epainter , tpainter = mapper.read_map("map.move2dmap")
