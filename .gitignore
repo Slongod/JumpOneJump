@@ -1,3 +1,4 @@
-.vscode/*
+.vscode/**
 启动.bat
-__pycache__/*
+__pycache__/**
+__pycache__
