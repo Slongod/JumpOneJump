@@ -113,6 +113,7 @@ class player(box):
         self.__running = NOTHING
         self.__is_dead = True
         self.stand_up()
+        self.__last_gold_time = 0
     def relive(self):
         self.__is_dead = False
 
