@@ -2,6 +2,7 @@ import pygame
 import time
 import render
 import character
+
 def read_map(name:str):
     # 读入地图
     env = []; text = []; epainter = []; tpainter = []
@@ -53,7 +54,8 @@ if __name__ == "__main__":
     height = render._screen_height / base_len # 纵向显示长度
     centerpos = (width * 0.5 , height * 0.3)
 
-    env , e2 , epainter , p2 = read_map("map.move2dmap")
+    mapname = "map{}.move2dmap".format(int(input()))
+    env , e2 , epainter , p2 = read_map(mapname)
     env.extend(e2); epainter.extend(p2)
 
     player_start = character.box(posx = 0 , posy = 0 , lenx = 1 , leny = 1)
@@ -132,7 +134,7 @@ if __name__ == "__main__":
                             nowid = -1
                 
             if (event.type == pygame.QUIT):
-                save('map.move2dmap' , env , epainter)
+                save(mapname , env , epainter)
                 exit()
         print(len(env))
         # 更新对象状态

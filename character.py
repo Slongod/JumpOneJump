@@ -106,6 +106,7 @@ class player(box):
         self.__last_gold_time = 0
         self.__info_gold = gold # (加速倍率 , 跳跃倍率 , 金币加成持续时间)
         self.__is_ducking = False
+        self.success = False
     
     def is_dead(self):
         return self.__is_dead
@@ -113,9 +114,9 @@ class player(box):
         self.__running = NOTHING
         self.__is_dead = True
         self.stand_up()
-        self.__last_gold_time = 0
     def relive(self):
         self.__is_dead = False
+        self.__last_gold_time = 0
 
     def duck(self):
         if self.__is_ducking:
@@ -202,10 +203,13 @@ class player(box):
         if ((orig_v >= 0) != (self.__v[X] >= 0) and self.__running == NOTHING):
             self.__v[X] = 0 
         # 限速
-        if (self.__v[X] > self.__max_run_speed):
-            self.__v[X] = self.__max_run_speed
-        if (self.__v[X] < -self.__max_run_speed):
-            self.__v[X] = -self.__max_run_speed
+        max_run_speed = self.__max_run_speed
+        if time.time() - self.__last_gold_time <= self.__info_gold[2]:
+            max_run_speed *= self.__info_gold[0]
+        if (self.__v[X] > max_run_speed):
+            self.__v[X] = max_run_speed
+        if (self.__v[X] < -max_run_speed):
+            self.__v[X] = -max_run_speed
         # 低速自动停止
         if (abs(self.__v[X]) < self.__stopv and self.__running == NOTHING):
             self.__v[X] = 0
@@ -248,6 +252,8 @@ class player(box):
                     break
                 elif b.gettype() == GOLD:
                     self.__last_gold_time = time.time()
+                elif b.gettype() == GREEN:
+                    self.success = True
                 
 
 class text:

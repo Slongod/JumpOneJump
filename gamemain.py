@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # 初始化 pygame
     pygame.init()
     screen = pygame.display.set_mode((render._screen_width , render._screen_height))
-    pygame.display.set_caption("move2dDemo")
+    pygame.display.set_caption("蹦一蹦")
     clock = pygame.time.Clock()
     pygame.display.update()
 
@@ -33,7 +33,9 @@ if __name__ == "__main__":
     pactor = character.player(posx = 0 , posy = 0 , gold = (2 , 4 , 5))
     ppainter = character.player_painter(bind_player = pactor , color = character.BLUE)
     pctrller = character.player_controller(bind_player = pactor)
-    env , text , epainter , tpainter = mapper.read_map("map.move2dmap")
+
+    map_len = 4; now_mapid = 0
+    env , text , epainter , tpainter = mapper.read_map("map0.move2dmap")
     
     # 执行游戏
     is_player_alive = True
@@ -59,6 +61,13 @@ if __name__ == "__main__":
         ppainter.update(env)
         pctrller.update(env)
         lstime = time.time()
+
+        if pactor.success:
+            now_mapid += 1
+            env , text , epainter , tpainter = mapper.read_map("map{}.move2dmap".format(now_mapid))
+            pactor.posx , pactor.posy = (0 , 0)
+            pactor.relive()
+            pactor.success = False
 
         # 更新显示
         screen.fill((0 , 0 , 0))
