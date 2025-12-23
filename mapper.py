@@ -6,7 +6,7 @@ import character
 def read_map(name:str):
     # 读入地图
     env = []; text = []; epainter = []; tpainter = []
-    file = open(name , "r")
+    file = open(name , "r" , encoding='utf-8')
     make_tuple = lambda s: tuple(float(x) for x in s.split(','))
     while(True):
         s = file.readline()
